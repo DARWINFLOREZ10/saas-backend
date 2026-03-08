@@ -1,4 +1,4 @@
-FROM node:20-slim AS builder
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -10,14 +10,16 @@ COPY package*.json ./
 RUN npm ci
 
 COPY tsconfig.json ./
+COPY jest.config.ts ./
 COPY src/ ./src/
+COPY tests/ ./tests/
 COPY prisma/ ./prisma/
 
 RUN npx prisma generate
 RUN npm run build
 
 # ─── Production image ─────────────────────────────────────────────────────────
-FROM node:20-slim AS production
+FROM node:22-bookworm-slim AS production
 
 WORKDIR /app
 

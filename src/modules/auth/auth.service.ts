@@ -32,8 +32,25 @@ type JwtSigner = (payload: any, options?: any) => string;
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export async function register(input: RegisterInput, signJwt: JwtSigner): Promise<TokenPair> {
-  const tenant = await prisma.tenant.findUnique({ where: { slug: input.tenantSlug } });
-  if (!tenant || !tenant.isActive) {
+  let tenant = await prisma.tenant.findUnique({ where: { slug: input.tenantSlug } });
+
+  // Onboarding flow: if tenant does not exist, create it automatically.
+  if (!tenant) {
+    const humanName = input.tenantSlug
+      .split('-')
+      .filter(Boolean)
+      .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+      .join(' ');
+
+    tenant = await prisma.tenant.create({
+      data: {
+        slug: input.tenantSlug,
+        name: humanName || input.tenantSlug,
+      },
+    });
+  }
+
+  if (!tenant.isActive) {
     throw new AppError('Tenant not found or inactive', 404);
   }
 

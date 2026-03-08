@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+
+import { beforeAll, afterAll, beforeEach, describe, it, expect } from '@jest/globals';
 import { buildApp } from '../src/app';
 import { prisma } from '../src/infrastructure/database/prisma';
 import { FastifyInstance } from 'fastify';
