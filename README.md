@@ -6,22 +6,45 @@ Production-grade multi-tenant SaaS backend built with **Fastify**, **TypeScript*
 
 ```
 Client
-  │
-  ├── Rate Limiter (@fastify/rate-limit + Redis)
-  │
-  ├── API Gateway (Fastify)
-  │      ├── /api/v1/auth       → Authentication (JWT + refresh token rotation)
-  │      ├── /api/v1/tenants    → Tenant management (multi-tenant isolation)
-  │      ├── /api/v1/users      → User management (RBAC)
-  │      └── /api/v1/projects   → Projects + Tasks
-  │
-  ├── Background Workers (BullMQ)
-  │      ├── Email Worker       → Welcome emails, password reset
-  │      └── Report Worker      → Task completion, project summaries
-  │
-  ├── Redis                     → Rate limiting + session cache + job queues
-  └── PostgreSQL                → Primary data store (Prisma ORM)
+  |
+  v
+API Gateway (Fastify)
+  |
+  +-- Auth
+  +-- Users
+  +-- Projects
+  |
+  v
+Redis Cache
+  |
+  v
+BullMQ Queue
+  |
+  v
+Workers
+  |
+  v
+PostgreSQL (Prisma ORM)
 ```
+
+## System Design
+
+This backend simulates the architecture of a production SaaS platform.
+
+Key design decisions:
+
+- Multi-tenant isolation using `tenantId`
+- Redis cache-aside pattern
+- Background jobs with BullMQ workers
+- JWT authentication with refresh token rotation
+- Modular architecture by domain
+
+## Performance
+
+- Redis caching used to reduce database load
+- Rate limiting prevents abuse
+- Background workers process heavy jobs asynchronously
+- Stateless API allowing horizontal scaling
 
 ## Tech Stack
 
@@ -140,6 +163,14 @@ Tests use Fastify's built-in `inject()` — no HTTP server needed. Each test cle
 ## Environment Variables
 
 See `.env.example` for all available variables and their defaults.
+
+## Future Improvements
+
+- Kubernetes deployment
+- Distributed tracing
+- Observability (Prometheus + Grafana)
+- API gateway separation
+- Horizontal worker scaling
 
 ## Project Structure
 
